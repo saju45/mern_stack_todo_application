@@ -28,7 +28,9 @@ export const register = async (req, res) => {
 
     if (!data.success) {
       const mappedError = data.error.errors.map((er) => er.message);
-      return res.status(400).json({ error: mappedError });
+      console.log(mappedError);
+
+      return res.status(400).json({ error: mappedError[0] });
     }
 
     // check if user already exists
@@ -36,7 +38,7 @@ export const register = async (req, res) => {
     if (existingUser) {
       return res
         .status(400)
-        .json({ message: "Email already exists. Please use a different one." });
+        .json({ error: "Email already exists. Please use a different one." });
     }
     // create a new user
     const user = new User({ name, email, password });
@@ -83,5 +85,13 @@ export const login = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-  console.log("logout function");
+  try {
+    res.clearCookie("jwt", {
+      path: "/",
+    });
+    res.status(200).json({ message: "User logged out successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error logging out user" });
+  }
 };
